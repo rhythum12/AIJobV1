@@ -3,4 +3,4 @@ from rest_framework.decorators import api_view
 
 @api_view(['GET'])
 def hello_world(request):
-    return Response({"message": "Hello from Django backend!It is working"})
+    return Response({"message": "connected"})

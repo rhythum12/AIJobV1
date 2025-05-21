@@ -127,3 +127,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True  # Add if using CORS
+
+# backend/settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.FirebaseAuthentication',  # ✅ Correct path
+    ),
+}
+
+
+# backend/settings.py
+AUTH_USER_MODEL = 'api.FirebaseUser'
