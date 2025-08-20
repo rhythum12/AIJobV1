@@ -1,27 +1,149 @@
+
 import { Link } from 'react-router-dom';
 import Img from './../assets/Images/Img1.jpg';
+import { useState} from 'react';
+import Navbar from './../components/Navbar.jsx';
+import JobCard from './../components/Jobcard.jsx';
+const mockJobs = [
+  {
+    id: 1,
+    title: "Frontend Developer",
+    company: "TechCorp",
+    location: "New York, NY",
+    jobType: "Full-Time",
+    industry: "Tech",
+    salary: "$90,000",
+    description: "Join our dynamic team to build intuitive user interfaces for web apps..."
+  },
+  {
+    id: 2,
+    title: "Full Stack Engineer",
+    company: "CodeMasters",
+    location: "New York",
+    jobType: "Part-Time",
+    industry: "Tech",
+    salary: "$75,000",
+    description: "Work across frontend and backend to deliver full-featured applications..."
+  },
+  {
+    id: 3,
+    title: "Finance Analyst",
+    company: "MoneyWise",
+    location: "New York, NY",
+    jobType: "Full-Time",
+    industry: "Finance",
+    salary: "$80,000",
+    description: "Analyze financial data to guide business decisions and investments..."
+  },
+  {
+    id: 4,
+    title: "React Developer",
+    company: "InnoSoft",
+    location: "San Francisco, CA",
+    jobType: "Internship",
+    industry: "Tech",
+    salary: "$30,000",
+    description: "Build modern React-based components in a fast-paced development team..."
+  },
+];
+
 export default function Home() {
+
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const [filters, setFilters] = useState({
+    location: "",
+    jobType: "",
+    industry: "",
+  });
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setHasSearched(true);
+  };
+
+  const filteredJobs = mockJobs.filter((job) => {
+    return (
+      (job.location === filters.location) &&
+      (job.jobType === filters.jobType) &&
+      (job.industry === filters.industry)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar />
+
       <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-              Find Your Dream Job With AI Job Recommondation System
+              Find Your Dream Job With AI Job Recommendation System
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
               Our AI analyzes your skills and matches you with the perfect opportunities tailored just for you.
             </p>
+
+            <div className="flex text-black gap-4 mb-6 flex-wrap justify-center text-l">
+              <select
+                name="location"
+                value={filters.location}
+                onChange={handleFilterChange}
+                className="p-4 border rounded-md"
+              >
+                <option value="" disabled>Location</option>
+                <option value="New York, NY">New York, NY</option>
+                <option value="USA">USA</option>
+                <option value="San Francisco, CA">San Francisco, CA</option>
+              </select>
+
+              <select
+                name="jobType"
+                value={filters.jobType}
+                onChange={handleFilterChange}
+                className="p-4 border rounded-md"
+              >
+                <option value="" disabled>Job Type</option>
+                <option value="Full-Time">Full-Time</option>
+                <option value="Part-Time">Part-Time</option>
+                <option value="Internship">Internship</option>
+              </select>
+
+              <select
+                name="industry"
+                value={filters.industry}
+                onChange={handleFilterChange}
+                className="p-4 border rounded-md"
+              >
+                <option value="" disabled>Industry</option>
+                <option value="Tech">Tech</option>
+                <option value="Finance">Finance</option>
+                <option value="Education">Education</option>
+              </select>
+            </div>
+
           </div>
           <div className="md:w-1/2 md:pl-10">
             <div className="w-full h-64 md:h-80 flex items-center justify-center">
-              <img src={Img} className='rounded-3xl max-h-full' alt="img" />
+              <img src={Img} className='rounded-3xl max-h-full' alt="Job search" />
             </div>
           </div>
         </div>
       </section>
 
+      <section className="mt-12">
+        <div className="w-full flex justify-center my-12">
+          <div className="px-12 md:w-3/4 flex justify-center flex-col">
+            {!hasSearched ? (null) :
+              filteredJobs.length > 0 ?
+                (filteredJobs.map((job) => <JobCard key={job.id} job={job} />)) : (
+                  <div>
+                    <p className="text-gray-600 text-center text-xl" >No jobs match found.Try adjusting the filters</p>
+                  </div>
+                )}
+          </div>
+        </div>
+      </section>
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">How Our AI Finds Your Perfect Job</h2>
@@ -66,7 +188,6 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="flex flex-col md:flex-row gap-6">
-
               <div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-800">Smart Skill Mapping</h3>
                 <p className="text-gray-600">
@@ -84,11 +205,9 @@ export default function Home() {
                 </p>
               </div>
             </div>
-
           </div>
         </div>
       </section>
-
 
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -99,19 +218,19 @@ export default function Home() {
               { name: 'Technology' },
               { name: 'Healthcare' },
               { name: 'Finance' },
-              { name: 'Marketing'},
-              { name: 'Education'},
-              { name: 'Design'},
-              { name: 'Sales'},
-              { name: 'Engineering'},
-              { name: 'Customer Service'},
-              { name: 'Human Resources'},
-              { name: 'Remote'},
-              { name: 'Part-time'}
+              { name: 'Marketing' },
+              { name: 'Education' },
+              { name: 'Design' },
+              { name: 'Sales' },
+              { name: 'Engineering' },
+              { name: 'Customer Service' },
+              { name: 'Human Resources' },
+              { name: 'Remote' },
+              { name: 'Part-time' }
             ].map((category, index) => (
               <div
                 key={index}
-                className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 text-center cursor-default"
+                className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 text-center cursor-pointer"
               >
                 <h3 className="font-medium text-gray-800">{category.name}</h3>
               </div>
@@ -119,6 +238,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 text-center">
@@ -137,11 +258,11 @@ export default function Home() {
               to="/loginpage"
               className="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-8 py-3 rounded-md transition-colors duration-200"
             >
-              Login
+              Sign in
             </Link>
           </div>
         </div>
       </section>
     </div>
   );
-};
+}

@@ -36,7 +36,7 @@ export default function RegisterPage() {
 
   
 
-        <form onSubmit={handleRegister} className="space-y-5">
+        <form onSubmit={handleRegister} className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
