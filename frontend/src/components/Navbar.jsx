@@ -1,9 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUser } from '../context/UserContext.js';
+import { toast } from 'react-toastify';
 
 export default function Navbar({ isAuthenticated = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
+    const { logout } = useUser();
+
+    const handleLogout = async () => {
+        await logout();
+        toast.success('Logged out successfully! See you soon!');
+        navigate('/');
+    };
 
     function toggleMenu() {
         setIsOpen(!isOpen);
@@ -55,7 +64,7 @@ export default function Navbar({ isAuthenticated = false }) {
                                     </button>
                                 ))}
                                 <button
-                                    onClick={() => navigate('/loginpage')}
+                                    onClick={handleLogout}
                                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
                                 >
                                     Sign Out
@@ -133,7 +142,7 @@ export default function Navbar({ isAuthenticated = false }) {
                                 ))}
                                 <button
                                     onClick={() => {
-                                        navigate('/loginpage');
+                                        handleLogout();
                                         setIsOpen(false);
                                     }}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"

@@ -3,21 +3,62 @@ import googleIcon from '../assets/Icons/google-icon.svg'
 import linkedinIcon from '../assets/Icons/linkedin-icon.svg'
 import { useNavigate } from "react-router-dom";
 import registerUserImg from './../assets/Images/register_user.jpg';
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../Firebase/firebase.js';
+import { toast } from 'react-toastify';
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
+      toast.error("Passwords do not match");
+      setLoading(false);
       return;
     }
 
-    navigate('/dashboard')
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast.success('Account created successfully! Please login to continue.');
+      navigate('/loginpage');
+    } catch (error) {
+      setError(error.message);
+      toast.error('Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      toast.success('Google account linked successfully! Welcome to Job Recommender!');
+      navigate('/dashboard');
+    } catch (error) {
+      setError(error.message);
+      toast.error('Google registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   function loginPage(){
@@ -34,7 +75,11 @@ export default function RegisterPage() {
           Create Your Account
         </h2>
 
-  
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
@@ -78,9 +123,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition disabled:opacity-50"
           >
-            Register
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
 
@@ -92,14 +138,17 @@ export default function RegisterPage() {
 
         <div className="flex flex-col gap-3">
           <button
-            className="flex items-center justify-center w-full bg-white border py-2 rounded-md hover:bg-gray-100"
+            onClick={handleGoogleRegister}
+            disabled={loading}
+            className="flex items-center justify-center w-full bg-white border py-2 rounded-md hover:bg-gray-100 disabled:opacity-50"
           >
             <img src={googleIcon} alt="Google" className="w-5 h-5 mr-2" />
             Sign up with Google
           </button>
 
           <button
-            className="flex items-center justify-center w-full bg-white border py-2 rounded-md hover:bg-gray-100"
+            disabled={loading}
+            className="flex items-center justify-center w-full bg-white border py-2 rounded-md hover:bg-gray-100 disabled:opacity-50"
           >
             <img src={linkedinIcon} alt="LinkedIn" className="w-5 h-5 mr-2" />
             Sign up with LinkedIn

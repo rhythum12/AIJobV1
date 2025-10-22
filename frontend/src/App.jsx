@@ -1,6 +1,8 @@
 import './App.css';
 import { Navigate, Routes, Route } from 'react-router-dom';
 import { useUser } from './context/UserContext.js';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Home from './pages/Home.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
@@ -20,22 +22,36 @@ function App() {
   const { user } = useUser();
 
   return (
-    <Routes>
-      <Route index element={<Home />} />
-      <Route path="/loginpage" element={<LoginPage />} />
-      <Route path="/registration" element={<RegisterPage />} />
-      <Route path="/passwordreset" element={<PasswordResetPage />} />
-      <Route path="/dashboard" element={user?.email ? <DashboardPage /> : <Navigate to="/loginpage" />} />
-      <Route path="/jobs" element={<JobRecommendationsPage />} />
-      <Route path="/resumeanalysis" element={<ResumeAnalysis />} />
-      <Route path="/editresume" element={<EditResume />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/appliedjobs" element={<AppliedJobs />} />
-      <Route path="/savedjobs" element={<SavedJobs />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/aboutpageguest" element={<AboutPageGuest />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route index element={<Home />} />
+        <Route path="/loginpage" element={<LoginPage />} />
+        <Route path="/registration" element={<RegisterPage />} />
+        <Route path="/passwordreset" element={<PasswordResetPage />} />
+        <Route path="/dashboard" element={user?.email ? <DashboardPage /> : <Navigate to="/loginpage" />} />
+        <Route path="/jobs" element={<JobRecommendationsPage />} />
+        <Route path="/resumeanalysis" element={<ResumeAnalysis />} />
+        <Route path="/editresume" element={<EditResume />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/appliedjobs" element={<AppliedJobs />} />
+        <Route path="/savedjobs" element={<SavedJobs />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/aboutpageguest" element={<AboutPageGuest />} />
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+    </>
   );
 }
 
