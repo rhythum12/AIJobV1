@@ -17,13 +17,38 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Sync user with backend databases
+        await syncUserWithBackend(user);
+      }
       setUser(user);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  const syncUserWithBackend = async (firebaseUser) => {
+    try {
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('http://localhost:8000/api/users/sync/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        console.log('User synced with backend databases');
+      } else {
+        console.error('Failed to sync user with backend');
+      }
+    } catch (error) {
+      console.error('Error syncing user:', error);
+    }
+  };
 
   const updateUser = (userData) => {
     setUser(userData);
