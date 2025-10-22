@@ -5,7 +5,6 @@ import loginUserImg from './../assets/Images/login_user.jpg';
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-    const [error, setError] = useState("");
     const navigate = useNavigate();
     const handleLogin = (e) => {
         e.preventDefault();
@@ -32,12 +31,6 @@ export default function LoginPage() {
                 <h2 className="text-xl font-bold text-center text-gray-800">
                     Login to Your Account
                 </h2>
-
-                {error && (
-                    <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-2">
-                        {error}
-                    </div>
-                )}
 
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
