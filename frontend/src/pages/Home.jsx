@@ -1,9 +1,16 @@
 import { Link } from 'react-router-dom';
+import { useUser } from '../context/UserContext.js';
+import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
 import Img from './../assets/Images/Img1.jpg';
+
 export default function Home() {
+  const { user } = useUser();
+  const isAuthenticated = !!user?.email;
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar isAuthenticated={isAuthenticated} />
       <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
@@ -21,6 +28,143 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Dashboard Section for Authenticated Users */}
+      {isAuthenticated && (
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+              Welcome back, {user?.name || 'User'}!
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Applied Jobs</p>
+                    <p className="text-2xl font-semibold text-gray-900">12</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center">
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Saved Jobs</p>
+                    <p className="text-2xl font-semibold text-gray-900">8</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center">
+                  <div className="bg-yellow-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Matches</p>
+                    <p className="text-2xl font-semibold text-gray-900">24</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center">
+                  <div className="bg-purple-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Profile Score</p>
+                    <p className="text-2xl font-semibold text-gray-900">85%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => window.location.href = '/jobs'}
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span className="font-medium">Browse New Jobs</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => window.location.href = '/resumeanalysis'}
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="font-medium">Analyze Resume</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => window.location.href = '/editresume'}
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span className="font-medium">Edit Resume</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Applied to Software Engineer at TechCorp</p>
+                      <p className="text-xs text-gray-500">2 hours ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Saved Data Analyst position</p>
+                      <p className="text-xs text-gray-500">1 day ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Resume analysis completed</p>
+                      <p className="text-xs text-gray-500">3 days ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -142,6 +286,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

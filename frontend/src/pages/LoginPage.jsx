@@ -20,6 +20,10 @@ export default function LoginPage() {
         navigate('/passwordreset');
     }
 
+    function goHome() {
+        navigate('/');
+    }
+
 
 
     return (
@@ -28,6 +32,17 @@ export default function LoginPage() {
                 <img src={loginUserImg} alt="img" className="h-full rounded-xl rounded-r-none " />
             </div>
             <div className="max-w-md md:w-2/4 h-full bg-white py-6 px-14 md:py-6 rounded-xl md:rounded-l-none ">
+                <div className="flex items-center mb-4">
+                    <button
+                        onClick={goHome}
+                        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Home
+                    </button>
+                </div>
                 <h2 className="text-xl font-bold text-center text-gray-800">
                     Login to Your Account
                 </h2>
