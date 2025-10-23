@@ -835,3 +835,37 @@ def _get_firebase_uid_from_request(request) -> Optional[str]:
     except Exception as e:
         logger.error(f"Error extracting Firebase UID: {e}")
         return None
+
+@api_view(['GET'])
+def get_skills(request):
+    """Get all available skills"""
+    try:
+        from api.models import JobSkill
+        
+        skills = JobSkill.objects.all().values_list('name', flat=True)
+        
+        return Response({
+            'success': True,
+            'skills': list(skills)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting skills: {e}")
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_categories(request):
+    """Get all available job categories"""
+    try:
+        from api.models import JobCategory
+        
+        categories = JobCategory.objects.all().values_list('name', flat=True)
+        
+        return Response({
+            'success': True,
+            'categories': list(categories)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting categories: {e}")
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

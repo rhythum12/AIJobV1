@@ -146,45 +146,67 @@ def sync_user(request):
         # Check if user already exists
         existing_user = users_collection.find_one({'firebase_uid': firebase_uid})
         
+        # Try to get custom user data from request body
+        custom_user_data = None
+        try:
+            if request.body:
+                custom_user_data = json.loads(request.body)
+        except json.JSONDecodeError:
+            pass
+        
         if existing_user:
             # Update existing user
+            update_data = {
+                'last_sync': datetime.now().isoformat(),
+                'last_login': datetime.now().isoformat()
+            }
+            
+            # If custom data provided, merge it
+            if custom_user_data:
+                update_data.update(custom_user_data)
+            
             users_collection.update_one(
                 {'firebase_uid': firebase_uid},
-                {
-                    '$set': {
-                        'last_sync': datetime.now().isoformat(),
-                        'last_login': datetime.now().isoformat()
-                    }
-                }
+                {'$set': update_data}
             )
             logger.info(f"Updated existing user in MongoDB: {firebase_uid}")
             user_data = users_collection.find_one({'firebase_uid': firebase_uid})
         else:
             # Create new user
-            user_data = {
-                'firebase_uid': firebase_uid,
-                'email': f'user_{firebase_uid}@example.com',
-                'display_name': f'User {firebase_uid}',
-                'profile_complete': False,
-                'created_at': datetime.now().isoformat(),
-                'last_login': datetime.now().isoformat(),
-                'last_sync': datetime.now().isoformat(),
-                'preferences': {
-                    'job_categories': [],
-                    'locations': [],
-                    'salary_range': {'min': 0, 'max': 0},
-                    'work_type': []
-                },
-                'settings': {
-                    'profile_visibility': 'public',
-                    'email_notifications': True,
-                    'push_notifications': True,
-                    'job_alerts': True,
-                    'newsletter': False,
-                    'privacy_level': 'standard',
-                    'data_sharing': False
+            if custom_user_data:
+                # Use custom data if provided
+                user_data = custom_user_data
+                user_data['firebase_uid'] = firebase_uid
+                user_data['created_at'] = datetime.now().isoformat()
+                user_data['last_login'] = datetime.now().isoformat()
+                user_data['last_sync'] = datetime.now().isoformat()
+            else:
+                # Default user data
+                user_data = {
+                    'firebase_uid': firebase_uid,
+                    'email': f'user_{firebase_uid}@example.com',
+                    'display_name': f'User {firebase_uid}',
+                    'profile_complete': False,
+                    'created_at': datetime.now().isoformat(),
+                    'last_login': datetime.now().isoformat(),
+                    'last_sync': datetime.now().isoformat(),
+                    'preferences': {
+                        'job_categories': [],
+                        'locations': [],
+                        'salary_range': {'min': 0, 'max': 0},
+                        'work_type': []
+                    },
+                    'settings': {
+                        'profile_visibility': 'public',
+                        'email_notifications': True,
+                        'push_notifications': True,
+                        'job_alerts': True,
+                        'newsletter': False,
+                        'privacy_level': 'standard',
+                        'data_sharing': False
+                    }
                 }
-            }
+            
             users_collection.insert_one(user_data)
             logger.info(f"Created new user in MongoDB: {firebase_uid}")
         

@@ -35,4 +35,8 @@ urlpatterns = [
     # Analytics and insights
     path('analytics/dashboard/', views.dashboard_analytics, name='dashboard_analytics'),
     path('analytics/job-trends/', views.job_trends, name='job_trends'),
+    
+    # Skills and Categories
+    path('jobs/skills/', views.get_skills, name='get_skills'),
+    path('jobs/categories/', views.get_categories, name='get_categories'),
 ]

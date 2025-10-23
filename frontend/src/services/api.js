@@ -200,6 +200,15 @@ class ApiService {
   async getUserActivities() {
     return this.request('/users/activities/');
   }
+
+  // Skills and Categories
+  async getSkills() {
+    return this.request('/jobs/skills/');
+  }
+
+  async getCategories() {
+    return this.request('/jobs/categories/');
+  }
 }
 
 // Create and export a singleton instance
