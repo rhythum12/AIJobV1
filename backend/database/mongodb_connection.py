@@ -20,8 +20,8 @@ class MongoDBConnection:
             return True
             
         try:
-            # MongoDB connection string - use correct password
-            mongodb_url = os.getenv('MONGODB_URL', 'mongodb://admin:password123@localhost:27017/job_recommender?authSource=admin')
+            # MongoDB connection string - connect to Docker MongoDB on localhost
+            mongodb_url = os.getenv('MONGODB_URL', 'mongodb://localhost:27018/job_recommender')
             database_name = os.getenv('MONGODB_DATABASE', 'job_recommender')
             
             # Create MongoDB client

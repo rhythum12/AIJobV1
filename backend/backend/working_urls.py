@@ -84,7 +84,7 @@ from .page_views import (
 urlpatterns = [
     # API endpoints
     path('api/', include('api.urls')),
-    # path('api/users/', include('api.user_urls')),  # Temporarily disabled due to database connection issues
+    path('api/users/', include('api.user_urls')),
     path('health/', health_check, name='health_check'),
     
     # Home page

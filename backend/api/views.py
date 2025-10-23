@@ -54,45 +54,71 @@ def api_status(request):
 def job_list(request):
     """Get list of available jobs"""
     try:
+        from api.models import Job, Company, JobCategory
+        
         # Get query parameters
         page = int(request.GET.get('page', 1))
         limit = int(request.GET.get('limit', 20))
         category = request.GET.get('category', '')
         location = request.GET.get('location', '')
+        job_type = request.GET.get('job_type', '')
+        work_location = request.GET.get('work_location', '')
         
-        # Mock job data - replace with actual database queries
-        jobs = [
-            {
-                'id': 1,
-                'title': 'Senior Software Engineer',
-                'company': 'Tech Corp',
-                'location': 'San Francisco, CA',
-                'salary': '$120,000 - $150,000',
-                'description': 'We are looking for a senior software engineer...',
-                'requirements': ['Python', 'Django', 'React', 'PostgreSQL'],
-                'posted_date': '2024-01-15',
-                'application_deadline': '2024-02-15'
-            },
-            {
-                'id': 2,
-                'title': 'Full Stack Developer',
-                'company': 'StartupXYZ',
-                'location': 'Remote',
-                'salary': '$90,000 - $120,000',
-                'description': 'Join our growing team as a full stack developer...',
-                'requirements': ['JavaScript', 'Node.js', 'React', 'MongoDB'],
-                'posted_date': '2024-01-14',
-                'application_deadline': '2024-02-14'
+        # Build query
+        jobs_query = Job.objects.filter(is_active=True).select_related('company', 'category')
+        
+        # Apply filters
+        if category:
+            jobs_query = jobs_query.filter(category__name__icontains=category)
+        if location:
+            jobs_query = jobs_query.filter(location__icontains=location)
+        if job_type:
+            jobs_query = jobs_query.filter(job_type=job_type)
+        if work_location:
+            jobs_query = jobs_query.filter(work_location=work_location)
+        
+        # Get total count
+        total_jobs = jobs_query.count()
+        
+        # Apply pagination
+        start = (page - 1) * limit
+        end = start + limit
+        jobs = jobs_query[start:end]
+        
+        # Serialize jobs
+        jobs_data = []
+        for job in jobs:
+            # Get required skills
+            required_skills = list(job.skill_requirements.filter(is_required=True).values_list('skill__name', flat=True))
+            
+            job_data = {
+                'id': job.id,
+                'title': job.title,
+                'company': job.company.name,
+                'company_id': job.company.id,
+                'location': job.location,
+                'salary': f"${job.salary_min:,.0f} - ${job.salary_max:,.0f}" if job.salary_min and job.salary_max else "Salary not specified",
+                'description': job.description,
+                'requirements': required_skills,
+                'job_type': job.job_type,
+                'work_location': job.work_location,
+                'category': job.category.name if job.category else None,
+                'posted_date': job.posted_date.isoformat(),
+                'application_deadline': job.application_deadline.isoformat() if job.application_deadline else None,
+                'is_featured': job.is_featured,
+                'views_count': job.views_count,
+                'applications_count': job.applications_count
             }
-        ]
+            jobs_data.append(job_data)
         
         return Response({
             'success': True,
-            'jobs': jobs,
+            'jobs': jobs_data,
             'pagination': {
                 'page': page,
                 'limit': limit,
-                'total': len(jobs)
+                'total': total_jobs,
+                'pages': (total_jobs + limit - 1) // limit
             }
         })
         
@@ -104,23 +130,52 @@ def job_list(request):
 def job_detail(request, job_id):
     """Get detailed information about a specific job"""
     try:
-        # Mock job detail - replace with actual database query
+        from api.models import Job
+        
+        # Get job from database
+        try:
+            job = Job.objects.select_related('company', 'category').get(id=job_id, is_active=True)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Increment view count
+        job.views_count += 1
+        job.save(update_fields=['views_count'])
+        
+        # Get required skills
+        required_skills = list(job.skill_requirements.filter(is_required=True).values_list('skill__name', flat=True))
+        
+        # Serialize job detail
         job_detail = {
-            'id': job_id,
-            'title': 'Senior Software Engineer',
-            'company': 'Tech Corp',
-            'location': 'San Francisco, CA',
-            'salary': '$120,000 - $150,000',
-            'description': 'We are looking for a senior software engineer to join our team...',
-            'requirements': ['Python', 'Django', 'React', 'PostgreSQL', 'AWS'],
-            'benefits': ['Health Insurance', '401k', 'Flexible Hours', 'Remote Work'],
-            'posted_date': '2024-01-15',
-            'application_deadline': '2024-02-15',
+            'id': job.id,
+            'title': job.title,
+            'company': job.company.name,
+            'company_id': job.company.id,
+            'location': job.location,
+            'salary': f"${job.salary_min:,.0f} - ${job.salary_max:,.0f}" if job.salary_min and job.salary_max else "Salary not specified",
+            'description': job.description,
+            'requirements': job.requirements,
+            'responsibilities': job.responsibilities,
+            'benefits': job.benefits,
+            'required_skills': required_skills,
+            'job_type': job.job_type,
+            'work_location': job.work_location,
+            'category': job.category.name if job.category else None,
+            'posted_date': job.posted_date.isoformat(),
+            'application_deadline': job.application_deadline.isoformat() if job.application_deadline else None,
+            'application_url': job.application_url,
+            'application_email': job.application_email,
+            'is_featured': job.is_featured,
+            'views_count': job.views_count,
+            'applications_count': job.applications_count,
             'company_info': {
-                'name': 'Tech Corp',
-                'size': '100-500 employees',
-                'industry': 'Technology',
-                'website': 'https://techcorp.com'
+                'name': job.company.name,
+                'description': job.company.description,
+                'website': job.company.website,
+                'industry': job.company.industry,
+                'size': job.company.size,
+                'location': job.company.location,
+                'logo_url': job.company.logo_url
             }
         }
         
@@ -137,32 +192,104 @@ def job_detail(request, job_id):
 def job_search(request):
     """Search jobs with filters"""
     try:
+        from api.models import Job
+        from django.db.models import Q
+        
         query = request.GET.get('q', '')
         location = request.GET.get('location', '')
         category = request.GET.get('category', '')
         salary_min = request.GET.get('salary_min', '')
         salary_max = request.GET.get('salary_max', '')
+        job_type = request.GET.get('job_type', '')
+        work_location = request.GET.get('work_location', '')
         
-        # Mock search results - replace with actual search logic
-        search_results = [
-            {
-                'id': 1,
-                'title': 'Senior Software Engineer',
-                'company': 'Tech Corp',
-                'location': 'San Francisco, CA',
-                'salary': '$120,000 - $150,000',
-                'match_score': 95
+        # Build search query
+        jobs_query = Job.objects.filter(is_active=True).select_related('company', 'category')
+        
+        # Text search
+        if query:
+            jobs_query = jobs_query.filter(
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(requirements__icontains=query) |
+                Q(company__name__icontains=query)
+            )
+        
+        # Location filter
+        if location:
+            jobs_query = jobs_query.filter(location__icontains=location)
+        
+        # Category filter
+        if category:
+            jobs_query = jobs_query.filter(category__name__icontains=category)
+        
+        # Job type filter
+        if job_type:
+            jobs_query = jobs_query.filter(job_type=job_type)
+        
+        # Work location filter
+        if work_location:
+            jobs_query = jobs_query.filter(work_location=work_location)
+        
+        # Salary filters
+        if salary_min:
+            try:
+                salary_min_val = float(salary_min)
+                jobs_query = jobs_query.filter(salary_max__gte=salary_min_val)
+            except ValueError:
+                pass
+        
+        if salary_max:
+            try:
+                salary_max_val = float(salary_max)
+                jobs_query = jobs_query.filter(salary_min__lte=salary_max_val)
+            except ValueError:
+                pass
+        
+        # Get results
+        jobs = jobs_query.order_by('-is_featured', '-posted_date')[:50]  # Limit to 50 results
+        
+        # Serialize results
+        search_results = []
+        for job in jobs:
+            # Calculate match score based on query relevance
+            match_score = 100
+            if query:
+                if query.lower() in job.title.lower():
+                    match_score = 95
+                elif query.lower() in job.description.lower():
+                    match_score = 85
+                elif query.lower() in job.company.name.lower():
+                    match_score = 80
+                else:
+                    match_score = 70
+            
+            job_data = {
+                'id': job.id,
+                'title': job.title,
+                'company': job.company.name,
+                'location': job.location,
+                'salary': f"${job.salary_min:,.0f} - ${job.salary_max:,.0f}" if job.salary_min and job.salary_max else "Salary not specified",
+                'job_type': job.job_type,
+                'work_location': job.work_location,
+                'category': job.category.name if job.category else None,
+                'posted_date': job.posted_date.isoformat(),
+                'is_featured': job.is_featured,
+                'match_score': match_score
             }
-        ]
+            search_results.append(job_data)
         
         return Response({
             'success': True,
             'results': search_results,
+            'total_results': len(search_results),
             'filters_applied': {
                 'query': query,
                 'location': location,
                 'category': category,
-                'salary_range': f"{salary_min}-{salary_max}"
+                'salary_range': f"{salary_min}-{salary_max}",
+                'job_type': job_type,
+                'work_location': work_location
             }
         })
         
@@ -179,31 +306,66 @@ def job_recommendations(request):
         if not firebase_uid:
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Mock recommendations - replace with actual ML recommendation logic
-        recommendations = [
-            {
-                'id': 1,
-                'title': 'Senior Python Developer',
-                'company': 'AI Startup',
-                'location': 'San Francisco, CA',
-                'salary': '$130,000 - $160,000',
-                'match_score': 92,
-                'reason': 'Matches your Python and Django experience'
-            },
-            {
-                'id': 2,
-                'title': 'Full Stack Developer',
-                'company': 'FinTech Corp',
-                'location': 'New York, NY',
-                'salary': '$110,000 - $140,000',
-                'match_score': 88,
-                'reason': 'Aligns with your React and JavaScript skills'
+        from api.models import Job, JobRecommendation, FirebaseUser
+        
+        # Get or create user
+        try:
+            user = FirebaseUser.objects.get(uid=firebase_uid)
+        except FirebaseUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get existing recommendations for user
+        recommendations_query = JobRecommendation.objects.filter(
+            user=user,
+            job__is_active=True
+        ).select_related('job', 'job__company', 'job__category').order_by('-match_score')
+        
+        # If no recommendations exist, create some based on available jobs
+        if not recommendations_query.exists():
+            # Get recent active jobs
+            recent_jobs = Job.objects.filter(is_active=True).select_related('company', 'category').order_by('-posted_date')[:10]
+            
+            # Create mock recommendations
+            for i, job in enumerate(recent_jobs):
+                match_score = 90 - (i * 5)  # Decreasing match scores
+                JobRecommendation.objects.create(
+                    user=user,
+                    job=job,
+                    match_score=match_score,
+                    reason=f"Based on your profile and job market trends",
+                    algorithm_version='v1.0'
+                )
+            
+            # Refresh the query
+            recommendations_query = JobRecommendation.objects.filter(
+                user=user,
+                job__is_active=True
+            ).select_related('job', 'job__company', 'job__category').order_by('-match_score')
+        
+        # Serialize recommendations
+        recommendations = []
+        for rec in recommendations_query[:10]:  # Limit to 10 recommendations
+            job = rec.job
+            recommendation_data = {
+                'id': job.id,
+                'title': job.title,
+                'company': job.company.name,
+                'location': job.location,
+                'salary': f"${job.salary_min:,.0f} - ${job.salary_max:,.0f}" if job.salary_min and job.salary_max else "Salary not specified",
+                'job_type': job.job_type,
+                'work_location': job.work_location,
+                'category': job.category.name if job.category else None,
+                'posted_date': job.posted_date.isoformat(),
+                'match_score': rec.match_score,
+                'reason': rec.reason,
+                'is_featured': job.is_featured
             }
-        ]
+            recommendations.append(recommendation_data)
         
         return Response({
             'success': True,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'total_recommendations': len(recommendations)
         })
         
     except Exception as e:
@@ -419,26 +581,74 @@ def applied_jobs(request):
 def saved_jobs(request):
     """Get user's saved jobs"""
     try:
+        from api.models import SavedJob, Job, Company
+        
         # Get Firebase UID from request
         firebase_uid = _get_firebase_uid_from_request(request)
-        if not firebase_uid:
-            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Mock saved jobs data
-        saved_jobs = [
-            {
-                'id': 3,
-                'job_title': 'DevOps Engineer',
-                'company': 'CloudTech',
-                'saved_date': '2024-01-12',
-                'location': 'Remote',
-                'salary': '$100,000 - $130,000'
+        # For testing purposes, if no authentication, return sample data
+        if not firebase_uid:
+            # Return sample saved jobs for testing
+            sample_saved_jobs = [
+                {
+                    'id': 1,
+                    'job_title': 'Senior Software Engineer',
+                    'company': 'TechCorp Solutions',
+                    'saved_date': '2024-01-12',
+                    'location': 'San Francisco, CA',
+                    'salary': '$120,000 - $160,000',
+                    'job_type': 'full-time',
+                    'work_location': 'hybrid'
+                },
+                {
+                    'id': 2,
+                    'job_title': 'Data Scientist',
+                    'company': 'DataFlow Inc',
+                    'saved_date': '2024-01-10',
+                    'location': 'New York, NY',
+                    'salary': '$100,000 - $140,000',
+                    'job_type': 'full-time',
+                    'work_location': 'remote'
+                }
+            ]
+            
+            return Response({
+                'success': True,
+                'saved_jobs': sample_saved_jobs,
+                'message': 'Sample data (authentication required for real user data)'
+            })
+        
+        # Get or create user
+        try:
+            from api.models import FirebaseUser
+            user = FirebaseUser.objects.get(uid=firebase_uid)
+        except FirebaseUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get saved jobs from database
+        saved_jobs_query = SavedJob.objects.filter(user=user).select_related('job', 'job__company')
+        
+        # Serialize saved jobs
+        saved_jobs = []
+        for saved_job in saved_jobs_query:
+            job = saved_job.job
+            saved_job_data = {
+                'id': job.id,
+                'job_title': job.title,
+                'company': job.company.name,
+                'saved_date': saved_job.saved_date.isoformat(),
+                'location': job.location,
+                'salary': f"${job.salary_min:,.0f} - ${job.salary_max:,.0f}" if job.salary_min and job.salary_max else "Salary not specified",
+                'job_type': job.job_type,
+                'work_location': job.work_location,
+                'notes': saved_job.notes
             }
-        ]
+            saved_jobs.append(saved_job_data)
         
         return Response({
             'success': True,
-            'saved_jobs': saved_jobs
+            'saved_jobs': saved_jobs,
+            'total_saved': len(saved_jobs)
         })
         
     except Exception as e:

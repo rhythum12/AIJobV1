@@ -31,20 +31,9 @@ export const UserProvider = ({ children }) => {
 
   const syncUserWithBackend = async (firebaseUser) => {
     try {
-      const token = await firebaseUser.getIdToken();
-      const response = await fetch('http://localhost:8000/api/users/sync/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        console.log('User synced with backend databases');
-      } else {
-        console.error('Failed to sync user with backend');
-      }
+      const { default: apiService } = await import('../services/api');
+      const result = await apiService.syncUser();
+      console.log('User synced with backend databases:', result);
     } catch (error) {
       console.error('Error syncing user:', error);
     }
