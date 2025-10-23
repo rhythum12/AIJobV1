@@ -1,34 +1,45 @@
-"""
-URL configuration for backend project.
+# """
+# URL configuration for job_recommender project.
+# """
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
-from django.urls import path, include
+# from django.contrib import admin
+# from django.urls import path, include
+# from django.http import JsonResponse
+
+# def health_check(request):
+#     """Health check endpoint"""
+#     return JsonResponse({'status': 'healthy', 'message': 'Job Recommender API is running'})
 
 # urlpatterns = [
 #     path('admin/', admin.site.urls),
-#     path('api/', include('api.urls')),
+#     path('health/', health_check, name='health_check'),
+#     path('api/users/', include('api.user_urls')),
+#     path('api/', include('api.user_urls')),  # Fallback for API calls
+ 
 # ]
+"""
+Main URL configuration for job_recommender project.
+"""
 
+from django.contrib import admin
+from django.urls import path, include
 from django.http import JsonResponse
 
-def home(request):
-    return JsonResponse({"message": "Welcome to Django!"})
+def health_check(request):
+    """Health check endpoint"""
+    return JsonResponse({'status': 'healthy', 'message': 'Job Recommender API is running'})
 
 urlpatterns = [
-    path('', home),  # 👈 Root route
+    # Admin interface
     path('admin/', admin.site.urls),
+    
+    # Health check
+    path('health/', health_check, name='health_check'),
+    
+    # API endpoints
     path('api/', include('api.urls')),
+    path('api/users/', include('api.user_urls')),
+    
+    # Page routing (for serving React app)
+    path('', include('backend.page_urls')),
 ]
