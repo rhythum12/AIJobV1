@@ -151,16 +151,25 @@ FIREBASE_CREDENTIALS = {
     "token_uri": "https://oauth2.googleapis.com/token",
 }
 
-# Initialize Firebase
-try:
-    if FIREBASE_CREDENTIALS.get('private_key'):
-        cred = credentials.Certificate(FIREBASE_CREDENTIALS)
-        initialize_app(cred)
-        print("Firebase initialized successfully")
-    else:
-        print("Firebase credentials not found, using default configuration")
-except Exception as e:
-    print(f"Firebase initialization error: {e}")
+# Firebase initialization - moved to lazy loading
+# Firebase will be initialized when first needed, not at startup
+FIREBASE_INITIALIZED = False
+
+def get_firebase_app():
+    """Lazy initialization of Firebase app"""
+    global FIREBASE_INITIALIZED
+    if not FIREBASE_INITIALIZED:
+        try:
+            if FIREBASE_CREDENTIALS.get('private_key'):
+                cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+                initialize_app(cred)
+                print("Firebase initialized successfully")
+            else:
+                print("Firebase credentials not found, using default configuration")
+            FIREBASE_INITIALIZED = True
+        except Exception as e:
+            print(f"Firebase initialization error: {e}")
+    return FIREBASE_INITIALIZED
 
 # Logging configuration
 LOGGING = {

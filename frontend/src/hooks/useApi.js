@@ -94,3 +94,7 @@ export const useUserProfile = () => {
   return useApiData(() => apiService.getUserProfile());
 };
 
+export const useAiJobs = (params = {}) => {
+  return useApiData(() => apiService.getAiJobs(params), [JSON.stringify(params)]);
+};
+

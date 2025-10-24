@@ -49,7 +49,7 @@ def user_profile(request, user_id=None):
             
             # Connect to MongoDB
             mongodb = get_mongodb()
-            if not mongodb.connect():
+            if mongodb.connect() is False:
                 return Response({'error': 'Database connection failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             # Get users collection
@@ -107,7 +107,7 @@ def user_profile(request, user_id=None):
         
         # For authenticated users, get real user data from MongoDB
         mongodb = get_mongodb()
-        if not mongodb.connect():
+        if mongodb.connect() is False:
             return Response({'error': 'Database connection failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         users_collection = mongodb.get_collection('users')
@@ -138,7 +138,7 @@ def sync_user(request):
         
         # Connect to MongoDB
         mongodb = get_mongodb()
-        if not mongodb.connect():
+        if mongodb.connect() is False:
             return Response({'error': 'Database connection failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         users_collection = mongodb.get_collection('users')
@@ -377,7 +377,7 @@ def list_all_users(request):
     """List all users in the system"""
     try:
         mongodb = get_mongodb()
-        if not mongodb.connect():
+        if mongodb.connect() is False:
             return Response({'error': 'Database connection failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         users_collection = mongodb.get_collection('users')

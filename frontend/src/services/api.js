@@ -209,6 +209,27 @@ class ApiService {
   async getCategories() {
     return this.request('/jobs/categories/');
   }
+
+  // AI Jobs endpoints
+  async getAiJobs(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/jobs/ai/?${queryString}` : '/jobs/ai/';
+    return this.request(endpoint);
+  }
+
+  async refreshAiJobs(params = {}) {
+    return this.request('/jobs/ai/refresh/', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async saveAiJob(jobData) {
+    return this.request('/jobs/ai/save/', {
+      method: 'POST',
+      body: JSON.stringify(jobData),
+    });
+  }
 }
 
 // Create and export a singleton instance

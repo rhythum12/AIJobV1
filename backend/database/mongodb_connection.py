@@ -52,7 +52,7 @@ class MongoDBConnection:
         """Get a specific collection from the database"""
         if not self.connected:
             self.connect()
-        if not self.db:
+        if self.db is None:
             raise Exception("Database connection not established")
         return self.db[collection_name]
 

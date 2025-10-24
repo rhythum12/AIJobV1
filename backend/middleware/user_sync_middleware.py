@@ -9,7 +9,7 @@ from django.utils.deprecation import MiddlewareMixin
 from firebase_admin import auth as firebase_auth
 from firebase_admin.exceptions import FirebaseError
 
-from services.user_service import user_service
+# Import user_service lazily to avoid database connections at startup
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +82,8 @@ class UserSyncMiddleware(MiddlewareMixin):
     def _check_user_exists(self, firebase_uid: str) -> bool:
         """Check if user exists in database"""
         try:
+            # Lazy import to avoid database connections at startup
+            from services.user_service import user_service
             # This is a synchronous check, so we'll use a simple approach
             # In production, you might want to cache this information
             return False  # Always sync for now, can be optimized later

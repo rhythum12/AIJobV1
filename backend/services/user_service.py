@@ -18,9 +18,31 @@ class UserService:
     """Service for managing user data across Firebase, MongoDB, and PostgreSQL"""
     
     def __init__(self):
-        self.mongodb_users = get_mongodb_collection('users')
-        self.mongodb_activities = get_mongodb_collection('user_activities')
-        self.postgresql = get_postgresql()
+        # Lazy initialization - don't connect to databases until needed
+        self._mongodb_users = None
+        self._mongodb_activities = None
+        self._postgresql = None
+    
+    @property
+    def mongodb_users(self):
+        """Lazy load MongoDB users collection"""
+        if self._mongodb_users is None:
+            self._mongodb_users = get_mongodb_collection('users')
+        return self._mongodb_users
+    
+    @property
+    def mongodb_activities(self):
+        """Lazy load MongoDB activities collection"""
+        if self._mongodb_activities is None:
+            self._mongodb_activities = get_mongodb_collection('user_activities')
+        return self._mongodb_activities
+    
+    @property
+    def postgresql(self):
+        """Lazy load PostgreSQL connection"""
+        if self._postgresql is None:
+            self._postgresql = get_postgresql()
+        return self._postgresql
     
     async def create_or_update_user(self, firebase_uid: str, firebase_user_data: Dict[str, Any]) -> UserProfile:
         """Create or update user in both databases from Firebase data"""
